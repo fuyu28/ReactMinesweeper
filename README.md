@@ -5,7 +5,7 @@ Play the game in your browser!
 
 ## 🖥️ Demo
 
-<!-- ➡️ [Play on Vercel](TODO:paste link) -->
+➡️ [Play on Vercel](https://react-minesweeper-ruddy.vercel.app/)
 
 ## ⚙️ Features
 
