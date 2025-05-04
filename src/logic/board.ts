@@ -1,4 +1,5 @@
 import type { Cell } from "../types/cell.ts";
+import { directions } from "../constants/directions.ts";
 
 export function initializeBoard(
   rows: number,
@@ -62,4 +63,33 @@ export function initializeBoard(
     }
   }
   return board;
+}
+
+export function floodFill(board: Cell[][], x: number, y: number): Cell[][] {
+  const rows = board.length;
+  const cols = board[0].length;
+
+  const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
+  const visited = new Set<string>();
+  const queue: [number, number][] = [[x, y]];
+
+  while (queue.length > 0) {
+    const [r, c] = queue.shift()!;
+    const key = `${r},${c}`;
+    if (visited.has(key)) continue;
+    visited.add(key);
+    newBoard[r][c].isOpen = true;
+    if (newBoard[r][c].value === 0) {
+      for (const [dr, dc] of directions) {
+        const nr = r + dr;
+        const nc = c + dc;
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+          if (!newBoard[nr][nc].isOpen && !newBoard[nr][nc].isFlagged) {
+            queue.push([nr, nc]);
+          }
+        }
+      }
+    }
+  }
+  return newBoard;
 }
