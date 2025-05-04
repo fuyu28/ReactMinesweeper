@@ -7,7 +7,7 @@ import type { Cell } from "./types/cell.ts";
 import GameSettingsComponent from "./components/GameSettings";
 import GameBoard from "./components/GameBoard";
 
-import { initializeBoard, floodFill } from "./logic/board.ts";
+import { initializeBoard, floodFill, getSafeArea } from "./logic/board.ts";
 import { checkGameSettings } from "./logic/checkGameSettings.ts";
 import { checkWin } from "./logic/rules.ts";
 
@@ -15,6 +15,7 @@ const defaultSettings: GameSettingsType = {
   rows: 9,
   cols: 9,
   mines: 10,
+  excludeCells: 9,
 };
 
 function App() {
@@ -27,7 +28,8 @@ function App() {
   function handleClick(r: number, c: number) {
     if (isFirstClick) {
       const { rows, cols, mines } = gameSettings;
-      const newBoard = initializeBoard(rows, cols, mines, [r, c]);
+      const safeArea = getSafeArea(r, c, rows, cols, 10);
+      const newBoard = initializeBoard(rows, cols, mines, safeArea);
       const floodedBoard = floodFill(newBoard, r, c);
       setBoard(floodedBoard);
       setGameStatus(GameStatus.Playing);
@@ -66,7 +68,8 @@ function App() {
       return;
     }
     const { rows, cols, mines } = gameSettings;
-    const newBoard = initializeBoard(rows, cols, mines, [-1, -1]);
+    const safeArea = getSafeArea(-1, -1, rows, cols, 10);
+    const newBoard = initializeBoard(rows, cols, mines, safeArea);
     setBoard(newBoard);
     setGameStatus(GameStatus.Ready);
     setIsFirstClick(true);
