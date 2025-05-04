@@ -3,7 +3,8 @@ import type { Cell } from "../types/cell.ts";
 export function initializeBoard(
   rows: number,
   cols: number,
-  mines: number
+  mines: number,
+  exclude: [number, number]
 ): Cell[][] {
   const board: Cell[][] = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
@@ -20,10 +21,15 @@ export function initializeBoard(
   while (placedMines < mines) {
     const row = Math.floor(Math.random() * rows);
     const col = Math.floor(Math.random() * cols);
-    if (board[row][col].value === 0) {
-      board[row][col].value = -1;
-      placedMines++;
+    if (
+      (row === exclude[0] && col === exclude[1]) ||
+      board[row][col].value === -1
+    ) {
+      continue; // Skip the cell that was clicked first
     }
+
+    board[row][col].value = -1;
+    placedMines++;
   }
 
   const directions = [

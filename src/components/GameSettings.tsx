@@ -3,10 +3,10 @@ import type { GameSettings as GameSettingsType } from "../types/gameSettings.ts"
 type Props = {
   settings: GameSettingsType;
   onChange: (newSettings: GameSettingsType) => void;
-  onStart: () => void;
+  onReset: () => void;
 };
 
-const GameSettings = ({ settings, onChange, onStart }: Props) => {
+const GameSettings = ({ settings, onChange, onReset }: Props) => {
   const handleChange = (key: keyof GameSettingsType, value: number) => {
     onChange({ ...settings, [key]: value });
   };
@@ -43,10 +43,10 @@ const GameSettings = ({ settings, onChange, onStart }: Props) => {
         ></input>
       </label>
       <button
-        onClick={onStart}
+        onClick={onReset}
         className="bg-blue-500 text-white px-2 py-1 rounded"
       >
-        Start Game
+        Reset Game
       </button>
     </div>
   );

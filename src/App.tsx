@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { GameSettings as GameSettingsType } from "./types/gameSettings.ts";
 import type { Cell } from "./types/cell.ts";
 import GameSettingsComponent from "./components/GameSettings";
 import GameBoard from "./components/GameBoard";
 import { initializeBoard } from "./logic/board.ts";
+import { checkGameSettings } from "./logic/checkGameSettings.ts";
 
 const defaultSettings: GameSettingsType = {
   rows: 9,
@@ -29,33 +30,31 @@ function App() {
   const [gameStatus, setGameStatus] = useState<
     "ready" | "playing" | "lost" | "won"
   >("ready");
-
-  const startGame = () => {
-    const { rows, cols, mines } = gameSettings;
-    if (rows < 1 || cols < 1 || mines < 1) {
-      alert("Invalid game settings!");
-      return;
-    }
-    if (mines > rows * cols) {
-      alert("Too many mines for the board size!");
-      return;
-    }
-    const newBoard = initializeBoard(rows, cols, mines);
-    setBoard(newBoard);
-    setGameStatus("playing");
-  };
+  const [isFirstClick, setIsFirstClick] = useState<boolean>(true);
 
   function handleClick(r: number, c: number) {
+    if (isFirstClick) {
+      const { rows, cols, mines } = gameSettings;
+      const newBoard = initializeBoard(rows, cols, mines, [r, c]);
+      const floodedBoard = floodFill(newBoard, r, c);
+      setBoard(floodedBoard);
+      setGameStatus("playing");
+      setIsFirstClick(false);
+      return;
+    }
+
     if (gameStatus !== "playing") return;
     if (board[r][c].value === -1) {
       setGameStatus("lost");
       alert("Game Over! You hit a mine.");
       return;
     }
+
     const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
     newBoard[r][c].isOpen = true;
     const floodedBoard = floodFill(newBoard, r, c);
     setBoard(floodedBoard);
+
     if (checkWin(floodedBoard, gameSettings.mines)) {
       setGameStatus("won");
       alert("Congratulations! You've won the game.");
@@ -110,12 +109,25 @@ function App() {
     return newBoard;
   }
 
+  function resetGame() {
+    const { rows, cols, mines } = gameSettings;
+    checkGameSettings(gameSettings);
+    const newBoard = initializeBoard(rows, cols, mines, [-1, -1]);
+    setBoard(newBoard);
+    setGameStatus("ready");
+    setIsFirstClick(true);
+  }
+
+  useEffect(() => {
+    resetGame();
+  }, []);
+
   return (
     <div className="p-4 flex flex-col items-center">
       <GameSettingsComponent
         settings={gameSettings}
         onChange={setGameSettings}
-        onStart={startGame}
+        onReset={resetGame}
       />
       <GameBoard
         board={board}
