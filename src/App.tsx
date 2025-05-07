@@ -11,7 +11,7 @@ import {
   initializeBoard,
   floodFill,
   getSafeArea,
-  openAllCells,
+  revealAllCells,
 } from "./logic/board.ts";
 import { checkGameSettings } from "./logic/checkGameSettings.ts";
 import { checkWin } from "./logic/rules.ts";
@@ -44,26 +44,26 @@ function App() {
 
     if (gameStatus !== GameStatus.Playing) return;
     if (board[r][c].isFlagged) {
-      alert("Cell is flagged. Unflag it before opening.");
+      alert("Cell is flagged. Unflag it before revealing.");
       return;
     }
     if (board[r][c].value === -1) {
       setGameStatus(GameStatus.Lost);
       alert("Game Over! You hit a mine.");
-      const newBoard = openAllCells(board);
+      const newBoard = revealAllCells(board);
       setBoard(newBoard);
       return;
     }
 
     const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
-    newBoard[r][c].isOpen = true;
+    newBoard[r][c].isRevealed = true;
     const floodedBoard = floodFill(newBoard, r, c);
     setBoard(floodedBoard);
 
     if (checkWin(floodedBoard, gameSettings.mines)) {
       setGameStatus(GameStatus.Won);
       alert("Congratulations! You've won the game.");
-      const newBoard = openAllCells(floodedBoard);
+      const newBoard = revealAllCells(floodedBoard);
       setBoard(newBoard);
     }
   }

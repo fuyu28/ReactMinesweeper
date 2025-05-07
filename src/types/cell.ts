@@ -1,5 +1,5 @@
 export type Cell = {
   value: number;
-  isOpen: boolean;
+  isRevealed: boolean;
   isFlagged: boolean;
 };

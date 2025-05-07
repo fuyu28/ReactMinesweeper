@@ -7,7 +7,7 @@ type Props = {
 };
 
 const Cell = ({ cell, onClick, onRightClick }: Props) => {
-  const style = cell.isOpen ? "bg-gray-200" : "bg-gray-400";
+  const style = cell.isRevealed ? "bg-gray-200" : "bg-gray-400";
 
   return (
     <button
@@ -18,7 +18,7 @@ const Cell = ({ cell, onClick, onRightClick }: Props) => {
         onRightClick();
       }}
     >
-      {cell.isOpen
+      {cell.isRevealed
         ? cell.value === -1
           ? "💣"
           : cell.value > 0

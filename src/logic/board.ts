@@ -19,7 +19,7 @@ export function initializeBoard(
   const board: Cell[][] = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
       value: 0,
-      isOpen: false,
+      isRevealed: false,
       isFlagged: false,
     }))
   );
@@ -40,17 +40,6 @@ export function initializeBoard(
     board[row][col].value = -1;
     placedMines++;
   }
-
-  const directions = [
-    [-1, -1],
-    [-1, 0],
-    [-1, 1],
-    [0, -1],
-    [0, 1],
-    [1, -1],
-    [1, 0],
-    [1, 1],
-  ];
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -81,13 +70,13 @@ export function floodFill(board: Cell[][], x: number, y: number): Cell[][] {
     const key = `${r},${c}`;
     if (visited.has(key)) continue;
     visited.add(key);
-    newBoard[r][c].isOpen = true;
+    newBoard[r][c].isRevealed = true;
     if (newBoard[r][c].value === 0) {
       for (const [dr, dc] of directions) {
         const nr = r + dr;
         const nc = c + dc;
         if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-          if (!newBoard[nr][nc].isOpen && !newBoard[nr][nc].isFlagged) {
+          if (!newBoard[nr][nc].isRevealed && !newBoard[nr][nc].isFlagged) {
             queue.push([nr, nc]);
           }
         }
@@ -124,9 +113,10 @@ export function getSafeArea(
       }
     }
   }
+  console.log("Safe area:", result);
   return result;
 }
 
-export function openAllCells(board: Cell[][]): Cell[][] {
-  return board.map((row) => row.map((cell) => ({ ...cell, isOpen: true })));
+export function revealAllCells(board: Cell[][]): Cell[][] {
+  return board.map((row) => row.map((cell) => ({ ...cell, isRevealed: true })));
 }
