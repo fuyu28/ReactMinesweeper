@@ -23,6 +23,7 @@ export function initializeBoard(
       isFlagged: false,
     }))
   );
+  console.log("exclude", exclude);
 
   let placedMines = 0;
   const excludeSet = new Set<string>(
@@ -35,7 +36,7 @@ export function initializeBoard(
     const row = Math.floor(Math.random() * rows);
     const col = Math.floor(Math.random() * cols);
     if (excludeSet.has(`${row},${col}`) || board[row][col].value === -1)
-      continue; // Skip the cell that was clicked first
+      continue;
 
     board[row][col].value = -1;
     placedMines++;
@@ -97,6 +98,10 @@ export function getSafeArea(
   const visited = new Set<string>();
   const result: [number, number][] = [];
 
+  if (r === -1 || c === -1) {
+    return result; // No safe area if the first click is not valid
+  }
+
   while (queue.length > 0 && result.length < limit) {
     const [cr, cc] = queue.shift()!;
     const key = `${cr},${cc}`;
@@ -113,7 +118,6 @@ export function getSafeArea(
       }
     }
   }
-  console.log("Safe area:", result);
   return result;
 }
 

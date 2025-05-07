@@ -31,39 +31,38 @@ function App() {
   const [isFirstClick, setIsFirstClick] = useState<boolean>(true);
 
   function handleClick(r: number, c: number) {
+    const { rows, cols, mines, excludeCells } = gameSettings;
+    let nextBoard: Cell[][];
     if (isFirstClick) {
-      const { rows, cols, mines } = gameSettings;
-      const safeArea = getSafeArea(r, c, rows, cols, 10);
-      const newBoard = initializeBoard(rows, cols, mines, safeArea);
-      const floodedBoard = floodFill(newBoard, r, c);
-      setBoard(floodedBoard);
+      const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
+      const initialBoard = initializeBoard(rows, cols, mines, safeArea);
+      nextBoard = initialBoard;
       setGameStatus(GameStatus.Playing);
       setIsFirstClick(false);
-      return;
+    } else {
+      if (gameStatus !== GameStatus.Playing) return;
+      if (board[r][c].isFlagged) {
+        alert("Cell is flagged. Unflag it before revealing.");
+        return;
+      }
+      if (board[r][c].value === -1) {
+        setGameStatus(GameStatus.Lost);
+        alert("Game Over! You hit a mine.");
+        setBoard(revealAllCells(board));
+        return;
+      }
+
+      nextBoard = board.map((row) => row.map((cell) => ({ ...cell })));
+      nextBoard[r][c].isRevealed = true;
     }
 
-    if (gameStatus !== GameStatus.Playing) return;
-    if (board[r][c].isFlagged) {
-      alert("Cell is flagged. Unflag it before revealing.");
-      return;
-    }
-    if (board[r][c].value === -1) {
-      setGameStatus(GameStatus.Lost);
-      alert("Game Over! You hit a mine.");
-      const newBoard = revealAllCells(board);
-      setBoard(newBoard);
-      return;
-    }
+    const flooded = floodFill(nextBoard, r, c);
+    setBoard(flooded);
 
-    const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
-    newBoard[r][c].isRevealed = true;
-    const floodedBoard = floodFill(newBoard, r, c);
-    setBoard(floodedBoard);
-
-    if (checkWin(floodedBoard, gameSettings.mines)) {
+    if (checkWin(flooded, gameSettings.mines)) {
       setGameStatus(GameStatus.Won);
       alert("Congratulations! You've won the game.");
-      const newBoard = revealAllCells(floodedBoard);
+      const newBoard = revealAllCells(flooded);
       setBoard(newBoard);
     }
   }
@@ -80,8 +79,8 @@ function App() {
       alert("Invalid game settings. Please check your input.");
       return;
     }
-    const { rows, cols, mines } = gameSettings;
-    const safeArea = getSafeArea(-1, -1, rows, cols, 10);
+    const { rows, cols, mines, excludeCells } = gameSettings;
+    const safeArea = getSafeArea(-1, -1, rows, cols, excludeCells);
     const newBoard = initializeBoard(rows, cols, mines, safeArea);
     setBoard(newBoard);
     setGameStatus(GameStatus.Ready);
