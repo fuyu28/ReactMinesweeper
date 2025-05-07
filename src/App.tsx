@@ -7,7 +7,12 @@ import type { Cell } from "./types/cell.ts";
 import GameSettingsComponent from "./components/GameSettings";
 import GameBoard from "./components/GameBoard";
 
-import { initializeBoard, floodFill, getSafeArea } from "./logic/board.ts";
+import {
+  initializeBoard,
+  floodFill,
+  getSafeArea,
+  openAllCells,
+} from "./logic/board.ts";
 import { checkGameSettings } from "./logic/checkGameSettings.ts";
 import { checkWin } from "./logic/rules.ts";
 
@@ -41,6 +46,8 @@ function App() {
     if (board[r][c].value === -1) {
       setGameStatus(GameStatus.Lost);
       alert("Game Over! You hit a mine.");
+      const newBoard = openAllCells(board);
+      setBoard(newBoard);
       return;
     }
 
@@ -52,6 +59,8 @@ function App() {
     if (checkWin(floodedBoard, gameSettings.mines)) {
       setGameStatus(GameStatus.Won);
       alert("Congratulations! You've won the game.");
+      const newBoard = openAllCells(floodedBoard);
+      setBoard(newBoard);
     }
   }
 

@@ -126,3 +126,7 @@ export function getSafeArea(
   }
   return result;
 }
+
+export function openAllCells(board: Cell[][]): Cell[][] {
+  return board.map((row) => row.map((cell) => ({ ...cell, isOpen: true })));
+}
