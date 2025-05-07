@@ -43,6 +43,10 @@ function App() {
     }
 
     if (gameStatus !== GameStatus.Playing) return;
+    if (board[r][c].isFlagged) {
+      alert("Cell is flagged. Unflag it before opening.");
+      return;
+    }
     if (board[r][c].value === -1) {
       setGameStatus(GameStatus.Lost);
       alert("Game Over! You hit a mine.");
