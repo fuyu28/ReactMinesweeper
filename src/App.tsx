@@ -1,20 +1,23 @@
 import { useState, useEffect } from "react";
 
 import type { GameSettings as GameSettingsType } from "./types/gameSettings.ts";
+import type { Board } from "./types/board.ts";
 import { GameStatus } from "./types/gameStatus.ts";
-import type { Cell } from "./types/cell.ts";
 
 import GameSettingsComponent from "./components/GameSettings";
 import GameBoard from "./components/GameBoard";
 import GameInfo from "./components/GameInfo";
+
+import { useGameTimer } from "./hooks/useGameTimer.ts";
 
 import {
   initializeBoard,
   floodFill,
   getSafeArea,
   revealAllCells,
+  copyBoard,
 } from "./logic/board.ts";
-import { remainFlags } from "./logic/info.ts";
+import { getRemainingFlags } from "./logic/info.ts";
 import { checkGameSettings } from "./logic/checkGameSettings.ts";
 import { checkWin } from "./logic/rules.ts";
 
@@ -28,32 +31,44 @@ const defaultSettings: GameSettingsType = {
 function App() {
   const [gameSettings, setGameSettings] =
     useState<GameSettingsType>(defaultSettings);
-  const [board, setBoard] = useState<Cell[][]>([]);
+  const [board, setBoard] = useState<Board>([]);
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Ready);
   const [mines, setMines] = useState<number | undefined>(undefined);
   const [isFirstClick, setIsFirstClick] = useState<boolean>(true);
   const [startTime, setStartTime] = useState<number | undefined>(undefined);
-  const [elapsedTime, setElapsedTime] = useState<number>(0);
 
-  useEffect(() => {
-    if (gameStatus !== GameStatus.Playing || startTime === undefined) return;
-    const timer = setInterval(() => {
-      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [gameStatus, startTime]);
+  function handleFirstClick(r: number, c: number): Board {
+    const { rows, cols, mines, excludeCells } = gameSettings;
+    const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
+    const initialBoard = initializeBoard(rows, cols, mines, safeArea);
+    const nextBoard = initialBoard;
+    setStartTime(Date.now());
+    setMines(mines);
+    setGameStatus(GameStatus.Playing);
+    setIsFirstClick(false);
+    return nextBoard;
+  }
+
+  function resetGame() {
+    if (!checkGameSettings(gameSettings)) {
+      alert("Invalid game settings. Please check your input.");
+      return;
+    }
+    const { rows, cols, mines, excludeCells } = gameSettings;
+    const safeArea = getSafeArea(-1, -1, rows, cols, excludeCells);
+    const newBoard = initializeBoard(rows, cols, mines, safeArea);
+    setBoard(newBoard);
+    setGameStatus(GameStatus.Ready);
+    resetElapsedTime();
+    setIsFirstClick(true);
+    setStartTime(undefined);
+    setMines(undefined);
+  }
 
   function handleClick(r: number, c: number) {
-    const { rows, cols, mines, excludeCells } = gameSettings;
-    let nextBoard: Cell[][];
+    let nextBoard: Board;
     if (isFirstClick) {
-      const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
-      const initialBoard = initializeBoard(rows, cols, mines, safeArea);
-      nextBoard = initialBoard;
-      setStartTime(Date.now());
-      setMines(mines);
-      setGameStatus(GameStatus.Playing);
-      setIsFirstClick(false);
+      nextBoard = handleFirstClick(r, c);
     } else {
       if (gameStatus !== GameStatus.Playing) return;
       if (board[r][c].isFlagged) {
@@ -61,7 +76,7 @@ function App() {
         return;
       }
       if (board[r][c].value === -1) {
-        nextBoard = board.map((row) => row.map((cell) => ({ ...cell })));
+        nextBoard = copyBoard(board);
         nextBoard[r][c].isRevealed = true;
         nextBoard[r][c].isExploded = true;
         setGameStatus(GameStatus.Lost);
@@ -70,7 +85,7 @@ function App() {
         return;
       }
 
-      nextBoard = board.map((row) => row.map((cell) => ({ ...cell })));
+      nextBoard = copyBoard(board);
       nextBoard[r][c].isRevealed = true;
     }
 
@@ -88,30 +103,16 @@ function App() {
   function handleRightClick(r: number, c: number) {
     if (gameStatus !== GameStatus.Playing) return;
     if (board[r][c].isRevealed) return;
-    const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
+    const newBoard = copyBoard(board);
     newBoard[r][c].isFlagged = !newBoard[r][c].isFlagged;
     setBoard(newBoard);
-  }
-
-  function resetGame() {
-    if (!checkGameSettings(gameSettings)) {
-      alert("Invalid game settings. Please check your input.");
-      return;
-    }
-    const { rows, cols, mines, excludeCells } = gameSettings;
-    const safeArea = getSafeArea(-1, -1, rows, cols, excludeCells);
-    const newBoard = initializeBoard(rows, cols, mines, safeArea);
-    setBoard(newBoard);
-    setGameStatus(GameStatus.Ready);
-    setIsFirstClick(true);
-    setElapsedTime(0);
-    setStartTime(undefined);
-    setMines(undefined);
   }
 
   useEffect(() => {
     resetGame();
   }, []);
+
+  const { elapsedTime, resetElapsedTime } = useGameTimer(gameStatus, startTime);
 
   return (
     <div className="p-4 flex flex-col items-center">
@@ -122,7 +123,7 @@ function App() {
       />
       <GameInfo
         mines={mines ?? 0}
-        remainFlags={remainFlags(mines ?? 0, board)}
+        getRemainingFlags={getRemainingFlags(mines ?? 0, board)}
         time={elapsedTime}
       />
       <GameBoard

@@ -6,39 +6,35 @@ type Props = {
   onRightClick: () => void;
 };
 
-const Cell = ({ cell, onClick, onRightClick }: Props) => {
-  const style = cell.isExploded
-    ? "bg-red-400"
-    : cell.isFlagged && cell.isFlagCorrect === true
-    ? "bg-green-300"
-    : cell.isFlagged && cell.isFlagCorrect === false
-    ? "bg-red-300"
-    : cell.isRevealed
-    ? "bg-gray-200"
-    : "bg-gray-400";
+function getCellDisplay(cell: Cell) {
+  if (cell.isExploded) return "💥"; // 爆発した箇所
+  if (cell.isFlagged) return "🚩"; // プレイ中の旗
+  if (cell.isRevealed && cell.value === -1) return "💣"; // 地雷
+  if (cell.isRevealed && cell.value > 0) return cell.value; // 数字
+  return ""; // 未開封のセル
+}
 
+function getCellStyle(cell: Cell) {
+  if (cell.isExploded) return "bg-red-400"; // 爆発した箇所
+  if (cell.isFlagged && cell.isFlagCorrect === true) return "bg-green-300"; // 正しい旗
+  if (cell.isFlagged && cell.isFlagCorrect === false) return "bg-red-300"; // 間違った旗
+  if (cell.isRevealed) return "bg-gray-200"; // 開封されたセル
+  return "bg-gray-400"; // 未開封のセル
+}
+
+const Cell = ({ cell, onClick, onRightClick }: Props) => {
   return (
     <button
-      className={`w-8 h-8 text-sm border border-gray-300 font-bold ${style}`}
+      className={`w-8 h-8 text-sm border border-gray-300 font-bold ${getCellStyle(
+        cell
+      )}`}
       onClick={onClick}
       onContextMenu={(e) => {
         e.preventDefault();
         onRightClick();
       }}
     >
-      {cell.isExploded
-        ? "💥" // 爆発した箇所
-        : cell.isFlagged && cell.isFlagCorrect === false
-        ? "🚩" // 間違った旗
-        : cell.isFlagged && cell.isFlagCorrect === true
-        ? "🚩" // 正しい旗
-        : cell.isFlagged
-        ? "🚩" // プレイ中の旗
-        : cell.isRevealed && cell.value === -1
-        ? "💣" // 地雷
-        : cell.isRevealed && cell.value > 0
-        ? cell.value // 数字
-        : ""}
+      {getCellDisplay(cell)}
     </button>
   );
 };

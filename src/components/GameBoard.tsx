@@ -1,7 +1,8 @@
+import type { Board } from "../types/board";
 import Cell from "./Cell";
 
 type Props = {
-  board: Cell[][];
+  board: Board;
   onClick: (x: number, y: number) => void;
   onRightClick: (x: number, y: number) => void;
 };
@@ -22,7 +23,7 @@ const GameBoard = ({ board, onClick, onRightClick }: Props) => {
       {board.flatMap((row, y) =>
         row.map((cell, x) => (
           <Cell
-            key={`${x}-${y}`}
+            key={`${y}-${x}`}
             cell={cell}
             onClick={() => onClick(y, x)}
             onRightClick={() => onRightClick(y, x)}

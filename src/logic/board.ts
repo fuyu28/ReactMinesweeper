@@ -1,47 +1,42 @@
-import type { Cell } from "../types/cell.ts";
+import type { Board } from "../types/board.ts";
 import { directions } from "../constants/directions.ts";
+import { isValidCell } from "../utils/grid.ts";
 
-function isValidCell(
-  r: number,
-  c: number,
-  rows: number,
-  cols: number
-): boolean {
-  return r >= 0 && r < rows && c >= 0 && c < cols;
-}
-
-export function initializeBoard(
-  rows: number,
-  cols: number,
-  mines: number,
-  exclude: [number, number][]
-): Cell[][] {
-  const board: Cell[][] = Array.from({ length: rows }, () =>
+function createEmptyBoard(rows: number, cols: number): Board {
+  return Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
       value: 0,
       isRevealed: false,
       isFlagged: false,
     }))
   );
-  console.log("exclude", exclude);
+}
 
-  let placedMines = 0;
-  const excludeSet = new Set<string>(
-    exclude.map((cell) => `${cell[0]},${cell[1]}`)
-  );
-  if (mines > rows * cols) {
-    throw new Error("Too many mines for the board size!");
+function placeMines(
+  board: Board,
+  rows: number,
+  cols: number,
+  mines: number,
+  excludeSet: Set<string>
+): Board {
+  let placed = 0;
+  while (placed < mines) {
+    const r = Math.floor(Math.random() * rows);
+    const c = Math.floor(Math.random() * cols);
+    if (excludeSet.has(`${r},${c}`) || board[r][c].value === -1) continue;
+
+    board[r][c].value = -1;
+    placed++;
   }
-  while (placedMines < mines) {
-    const row = Math.floor(Math.random() * rows);
-    const col = Math.floor(Math.random() * cols);
-    if (excludeSet.has(`${row},${col}`) || board[row][col].value === -1)
-      continue;
 
-    board[row][col].value = -1;
-    placedMines++;
-  }
+  return board;
+}
 
+export function calculateCellValues(
+  board: Board,
+  rows: number,
+  cols: number
+): Board {
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (board[r][c].value === -1) continue;
@@ -58,7 +53,20 @@ export function initializeBoard(
   return board;
 }
 
-export function floodFill(board: Cell[][], x: number, y: number): Cell[][] {
+export function initializeBoard(
+  rows: number,
+  cols: number,
+  mines: number,
+  exclude: [number, number][]
+): Board {
+  const board: Board = createEmptyBoard(rows, cols);
+  const excludeSet = new Set(exclude.map(([r, c]) => `${r},${c}`));
+  placeMines(board, rows, cols, mines, excludeSet);
+  calculateCellValues(board, rows, cols);
+  return board;
+}
+
+export function floodFill(board: Board, x: number, y: number): Board {
   const rows = board.length;
   const cols = board[0].length;
 
@@ -99,7 +107,7 @@ export function getSafeArea(
   const result: [number, number][] = [];
 
   if (r === -1 || c === -1) {
-    return result; // No safe area if the first click is not valid
+    return result;
   }
 
   while (queue.length > 0 && result.length < limit) {
@@ -121,7 +129,7 @@ export function getSafeArea(
   return result;
 }
 
-export function revealAllCells(board: Cell[][]): Cell[][] {
+export function revealAllCells(board: Board): Board {
   return board.map((row) =>
     row.map((cell) => {
       const isFlagCorrect =
@@ -137,4 +145,8 @@ export function revealAllCells(board: Cell[][]): Cell[][] {
       };
     })
   );
+}
+
+export function copyBoard(board: Board): Board {
+  return board.map((row) => row.map((cell) => ({ ...cell })));
 }

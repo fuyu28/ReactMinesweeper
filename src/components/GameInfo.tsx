@@ -1,17 +1,20 @@
-import {} from "../logic/info.ts";
-
 type Props = {
   mines: number;
-  remainFlags: number;
+  getRemainingFlags: number;
   time: number;
 };
 
-const GameInfo = ({ mines, remainFlags, time }: Props) => {
-  const remainFlagsText = remainFlags >= 0 ? "black" : "red";
+const getFlagsTextColor = (getRemainingFlags: number): string => {
+  return getRemainingFlags >= 0 ? "text-black" : "text-red-500";
+};
+
+const GameInfo = ({ mines, getRemainingFlags, time }: Props) => {
   return (
     <div className="mb-4 text-sm font-mono flex gap-4">
       <div>💣 {mines}</div>
-      <div style={{ color: remainFlagsText }}>🚩 {remainFlags}</div>
+      <div className={getFlagsTextColor(getRemainingFlags)}>
+        🚩 {getRemainingFlags}
+      </div>
       <div>⏱ {time}</div>
     </div>
   );
