@@ -61,9 +61,12 @@ function App() {
         return;
       }
       if (board[r][c].value === -1) {
+        nextBoard = board.map((row) => row.map((cell) => ({ ...cell })));
+        nextBoard[r][c].isRevealed = true;
+        nextBoard[r][c].isExploded = true;
         setGameStatus(GameStatus.Lost);
         alert("Game Over! You hit a mine.");
-        setBoard(revealAllCells(board));
+        setBoard(revealAllCells(nextBoard));
         return;
       }
 
@@ -84,6 +87,7 @@ function App() {
 
   function handleRightClick(r: number, c: number) {
     if (gameStatus !== GameStatus.Playing) return;
+    if (board[r][c].isRevealed) return;
     const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
     newBoard[r][c].isFlagged = !newBoard[r][c].isFlagged;
     setBoard(newBoard);

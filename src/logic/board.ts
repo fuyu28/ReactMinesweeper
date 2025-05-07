@@ -122,5 +122,19 @@ export function getSafeArea(
 }
 
 export function revealAllCells(board: Cell[][]): Cell[][] {
-  return board.map((row) => row.map((cell) => ({ ...cell, isRevealed: true })));
+  return board.map((row) =>
+    row.map((cell) => {
+      const isFlagCorrect =
+        cell.isFlagged && cell.value === -1
+          ? true
+          : cell.isFlagged && cell.value !== -1
+          ? false
+          : undefined;
+      return {
+        ...cell,
+        isRevealed: true,
+        isFlagCorrect,
+      };
+    })
+  );
 }

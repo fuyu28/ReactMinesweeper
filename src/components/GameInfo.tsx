@@ -7,10 +7,11 @@ type Props = {
 };
 
 const GameInfo = ({ mines, remainFlags, time }: Props) => {
+  const remainFlagsText = remainFlags >= 0 ? "black" : "red";
   return (
     <div className="mb-4 text-sm font-mono flex gap-4">
       <div>💣 {mines}</div>
-      <div>🚩 {remainFlags}</div>
+      <div style={{ color: remainFlagsText }}>🚩 {remainFlags}</div>
       <div>⏱ {time}</div>
     </div>
   );
