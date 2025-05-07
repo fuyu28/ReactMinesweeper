@@ -17,6 +17,7 @@ import {
   revealAllCells,
   copyBoard,
 } from "./logic/board.ts";
+import { revealAdjacentCells } from "./logic/boardActions.ts";
 import { getRemainingFlags } from "./logic/info.ts";
 import { checkGameSettings } from "./logic/checkGameSettings.ts";
 import { checkWin } from "./logic/rules.ts";
@@ -56,8 +57,8 @@ function App() {
     }
     const { rows, cols, mines, excludeCells } = gameSettings;
     const safeArea = getSafeArea(-1, -1, rows, cols, excludeCells);
-    const newBoard = initializeBoard(rows, cols, mines, safeArea);
-    setBoard(newBoard);
+    const nextBoard = initializeBoard(rows, cols, mines, safeArea);
+    setBoard(nextBoard);
     setGameStatus(GameStatus.Ready);
     resetElapsedTime();
     setIsFirstClick(true);
@@ -79,9 +80,7 @@ function App() {
         nextBoard = copyBoard(board);
         nextBoard[r][c].isRevealed = true;
         nextBoard[r][c].isExploded = true;
-        setGameStatus(GameStatus.Lost);
-        alert("Game Over! You hit a mine.");
-        setBoard(revealAllCells(nextBoard));
+        handleGameEnd(GameStatus.Lost, nextBoard);
         return;
       }
 
@@ -93,19 +92,38 @@ function App() {
     setBoard(flooded);
 
     if (checkWin(flooded, gameSettings.mines)) {
-      setGameStatus(GameStatus.Won);
-      alert("Congratulations! You've won the game.");
-      const newBoard = revealAllCells(flooded);
-      setBoard(newBoard);
+      handleGameEnd(GameStatus.Won, flooded);
+    }
+  }
+
+  function handleDoubleClick(r: number, c: number) {
+    const result = revealAdjacentCells(board, r, c, mines ?? 0);
+    setBoard(result.board);
+    if (result.status === GameStatus.Lost) {
+      handleGameEnd(GameStatus.Lost, result.board);
+    } else if (result.status === GameStatus.Won) {
+      handleGameEnd(GameStatus.Won, result.board);
     }
   }
 
   function handleRightClick(r: number, c: number) {
     if (gameStatus !== GameStatus.Playing) return;
     if (board[r][c].isRevealed) return;
-    const newBoard = copyBoard(board);
-    newBoard[r][c].isFlagged = !newBoard[r][c].isFlagged;
-    setBoard(newBoard);
+    const nextBoard = copyBoard(board);
+    nextBoard[r][c].isFlagged = !nextBoard[r][c].isFlagged;
+    setBoard(nextBoard);
+  }
+
+  function handleGameEnd(status: GameStatus, board: Board) {
+    if (status === GameStatus.Lost) {
+      setGameStatus(GameStatus.Lost);
+      setBoard(revealAllCells(board));
+      alert("Game Over! You hit a mine.");
+    } else if (status === GameStatus.Won) {
+      setGameStatus(GameStatus.Won);
+      setBoard(revealAllCells(board));
+      alert("Congratulations! You've won the game.");
+    }
   }
 
   useEffect(() => {
@@ -130,6 +148,7 @@ function App() {
         board={board}
         onClick={handleClick}
         onRightClick={handleRightClick}
+        onDoubleClick={handleDoubleClick}
       />
     </div>
   );

@@ -3,6 +3,7 @@ import type { Cell } from "../types/cell.ts";
 type Props = {
   cell: Cell;
   onClick: () => void;
+  onDoubleClick: () => void;
   onRightClick: () => void;
 };
 
@@ -22,13 +23,14 @@ function getCellStyle(cell: Cell) {
   return "bg-gray-400"; // 未開封のセル
 }
 
-const Cell = ({ cell, onClick, onRightClick }: Props) => {
+const Cell = ({ cell, onClick, onRightClick, onDoubleClick }: Props) => {
   return (
     <button
       className={`w-8 h-8 text-sm border border-gray-300 font-bold ${getCellStyle(
         cell
       )}`}
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
       onContextMenu={(e) => {
         e.preventDefault();
         onRightClick();

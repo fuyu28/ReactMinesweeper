@@ -5,9 +5,10 @@ type Props = {
   board: Board;
   onClick: (x: number, y: number) => void;
   onRightClick: (x: number, y: number) => void;
+  onDoubleClick: (x: number, y: number) => void;
 };
 
-const GameBoard = ({ board, onClick, onRightClick }: Props) => {
+const GameBoard = ({ board, onClick, onRightClick, onDoubleClick }: Props) => {
   if (board.length === 0) return null;
   const rows = board.length;
   const cols = board[0].length;
@@ -27,6 +28,7 @@ const GameBoard = ({ board, onClick, onRightClick }: Props) => {
             cell={cell}
             onClick={() => onClick(y, x)}
             onRightClick={() => onRightClick(y, x)}
+            onDoubleClick={() => onDoubleClick(y, x)}
           />
         ))
       )}
