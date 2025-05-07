@@ -6,6 +6,7 @@ import type { Cell } from "./types/cell.ts";
 
 import GameSettingsComponent from "./components/GameSettings";
 import GameBoard from "./components/GameBoard";
+import GameInfo from "./components/GameInfo";
 
 import {
   initializeBoard,
@@ -13,6 +14,7 @@ import {
   getSafeArea,
   revealAllCells,
 } from "./logic/board.ts";
+import { remainFlags } from "./logic/info.ts";
 import { checkGameSettings } from "./logic/checkGameSettings.ts";
 import { checkWin } from "./logic/rules.ts";
 
@@ -28,7 +30,18 @@ function App() {
     useState<GameSettingsType>(defaultSettings);
   const [board, setBoard] = useState<Cell[][]>([]);
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Ready);
+  const [mines, setMines] = useState<number | undefined>(undefined);
   const [isFirstClick, setIsFirstClick] = useState<boolean>(true);
+  const [startTime, setStartTime] = useState<number | undefined>(undefined);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+
+  useEffect(() => {
+    if (gameStatus !== GameStatus.Playing || startTime === undefined) return;
+    const timer = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [gameStatus, startTime]);
 
   function handleClick(r: number, c: number) {
     const { rows, cols, mines, excludeCells } = gameSettings;
@@ -37,6 +50,8 @@ function App() {
       const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
       const initialBoard = initializeBoard(rows, cols, mines, safeArea);
       nextBoard = initialBoard;
+      setStartTime(Date.now());
+      setMines(mines);
       setGameStatus(GameStatus.Playing);
       setIsFirstClick(false);
     } else {
@@ -85,6 +100,9 @@ function App() {
     setBoard(newBoard);
     setGameStatus(GameStatus.Ready);
     setIsFirstClick(true);
+    setElapsedTime(0);
+    setStartTime(undefined);
+    setMines(undefined);
   }
 
   useEffect(() => {
@@ -97,6 +115,11 @@ function App() {
         settings={gameSettings}
         onChange={setGameSettings}
         onReset={resetGame}
+      />
+      <GameInfo
+        mines={mines ?? 0}
+        remainFlags={remainFlags(mines ?? 0, board)}
+        time={elapsedTime}
       />
       <GameBoard
         board={board}
