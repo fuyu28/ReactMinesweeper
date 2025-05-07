@@ -13,7 +13,7 @@ const GameBoard = ({ board, onClick, onRightClick }: Props) => {
 
   return (
     <div
-      className="grid gap-1"
+      className="grid"
       style={{
         gridTemplateColumns: `repeat(${cols}, 2rem)`,
         gridTemplateRows: `repeat(${rows}, 2rem)`,

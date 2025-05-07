@@ -7,28 +7,26 @@ type Props = {
 };
 
 const Cell = ({ cell, onClick, onRightClick }: Props) => {
-  const style = cell.isOpen
-    ? "bg-gray-200"
-    : cell.isFlagged
-    ? "bg-yellow-400"
-    : "bg-gray-400";
+  const style = cell.isOpen ? "bg-gray-200" : "bg-gray-400";
 
   return (
     <button
-      className={`w-8 h-8 text-sm font-bold border ${style}`}
+      className={`w-8 h-8 text-sm border border-gray-300 font-bold ${style}`}
       onClick={onClick}
       onContextMenu={(e) => {
         e.preventDefault();
         onRightClick();
       }}
     >
-      {cell.isOpen && cell.value === -1
-        ? "💣"
-        : !cell.isOpen
-        ? ""
-        : cell.value === 0
-        ? ""
-        : cell.value}
+      {cell.isOpen
+        ? cell.value === -1
+          ? "💣"
+          : cell.value > 0
+          ? cell.value
+          : ""
+        : cell.isFlagged
+        ? "🚩"
+        : ""}
     </button>
   );
 };
