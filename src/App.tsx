@@ -43,6 +43,7 @@ function App() {
     const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
     const initialBoard = initializeBoard(rows, cols, mines, safeArea);
     const nextBoard = initialBoard;
+
     setStartTime(Date.now());
     setMines(mines);
     setGameStatus(GameStatus.Playing);
@@ -70,29 +71,37 @@ function App() {
     let nextBoard: Board;
     if (isFirstClick) {
       nextBoard = handleFirstClick(r, c);
+      nextBoard[r][c].isRevealed = true;
+      const flooded = floodFill(nextBoard, r, c);
+      setBoard(flooded);
+
+      if (nextBoard[r][c].value === -1) {
+        nextBoard[r][c].isExploded = true;
+        handleGameEnd(GameStatus.Lost, nextBoard);
+      }
+      if (checkWin(nextBoard, gameSettings.mines)) {
+        handleGameEnd(GameStatus.Won, nextBoard);
+      }
     } else {
       if (gameStatus !== GameStatus.Playing) return;
       if (board[r][c].isFlagged) {
         alert("Cell is flagged. Unflag it before revealing.");
         return;
       }
+
+      nextBoard = copyBoard(board);
+      nextBoard[r][c].isRevealed = true;
+      const flooded = floodFill(nextBoard, r, c);
+      setBoard(flooded);
+
       if (board[r][c].value === -1) {
-        nextBoard = copyBoard(board);
-        nextBoard[r][c].isRevealed = true;
         nextBoard[r][c].isExploded = true;
         handleGameEnd(GameStatus.Lost, nextBoard);
         return;
       }
-
-      nextBoard = copyBoard(board);
-      nextBoard[r][c].isRevealed = true;
-    }
-
-    const flooded = floodFill(nextBoard, r, c);
-    setBoard(flooded);
-
-    if (checkWin(flooded, gameSettings.mines)) {
-      handleGameEnd(GameStatus.Won, flooded);
+      if (checkWin(flooded, gameSettings.mines)) {
+        handleGameEnd(GameStatus.Won, flooded);
+      }
     }
   }
 

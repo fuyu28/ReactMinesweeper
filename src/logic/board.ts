@@ -14,11 +14,11 @@ function createEmptyBoard(rows: number, cols: number): Board {
 
 function placeMines(
   board: Board,
-  rows: number,
-  cols: number,
   mines: number,
   excludeSet: Set<string>
 ): Board {
+  const rows = board.length;
+  const cols = board[0].length;
   let placed = 0;
   while (placed < mines) {
     const r = Math.floor(Math.random() * rows);
@@ -32,11 +32,9 @@ function placeMines(
   return board;
 }
 
-export function calculateCellValues(
-  board: Board,
-  rows: number,
-  cols: number
-): Board {
+export function calculateCellValues(board: Board): Board {
+  const rows = board.length;
+  const cols = board[0].length;
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       if (board[r][c].value === -1) continue;
@@ -61,8 +59,8 @@ export function initializeBoard(
 ): Board {
   const board: Board = createEmptyBoard(rows, cols);
   const excludeSet = new Set(exclude.map(([r, c]) => `${r},${c}`));
-  placeMines(board, rows, cols, mines, excludeSet);
-  calculateCellValues(board, rows, cols);
+  placeMines(board, mines, excludeSet);
+  calculateCellValues(board);
   return board;
 }
 
@@ -70,7 +68,9 @@ export function floodFill(board: Board, x: number, y: number): Board {
   const rows = board.length;
   const cols = board[0].length;
 
-  const newBoard = board.map((row) => row.map((cell) => ({ ...cell })));
+  if (board[x][y].value === -1) return board;
+
+  const newBoard = copyBoard(board);
   const visited = new Set<string>();
   const queue: [number, number][] = [[x, y]];
 
