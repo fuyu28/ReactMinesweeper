@@ -7,7 +7,7 @@ type Props = {
 
 const ClickMode = ({ clickMode, onClick }: Props) => {
   const clickModes = [
-    { value: "single", label: "🔘" },
+    { value: "single", label: "👆" },
     { value: "double", label: "🔄" },
     { value: "right", label: "🚩" },
   ] as const;

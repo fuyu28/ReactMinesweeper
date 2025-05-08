@@ -9,6 +9,7 @@ import GameSettingsComponent from "./components/GameSettings";
 import GameBoard from "./components/GameBoard";
 import GameInfo from "./components/GameInfo";
 import ClickMode from "./components/ClickMode";
+import Help from "./components/Help";
 
 import { useGameTimer } from "./hooks/useGameTimer.ts";
 
@@ -158,6 +159,7 @@ function App() {
       <div className="block md:hidden">
         <ClickMode clickMode={clickMode} onClick={handleClickModeChange} />
       </div>
+      <Help />
       <div className="overflow-auto max-h-[80vh] max-w-[90vh]">
         <GameBoard
           board={board}
