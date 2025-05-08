@@ -7,13 +7,35 @@ import {
   copyBoard,
   floodFill,
   revealAllCells,
+  checkBadBoard,
 } from "./board";
+import { checkGameSettings } from "./checkGameSettings";
 import { checkWin } from "./rules";
 
 type revealResult =
   | { status: GameStatus.Playing; board: Board }
   | { status: GameStatus.Won; board: Board }
-  | { status: GameStatus.Lost; board: Board };
+  | { status: GameStatus.Lost; board: Board }
+  | { status: GameStatus.Error; board: Board };
+
+function generateGoodBoard(
+  r: number,
+  c: number,
+  rows: number,
+  cols: number,
+  mines: number,
+  excludeCells: number
+): Board {
+  while (true) {
+    const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
+    const initialBoard = initializeBoard(rows, cols, mines, safeArea);
+    initialBoard[r][c].isRevealed = true;
+    const result = floodFill(initialBoard, r, c);
+    if (!checkBadBoard(result.openCells)) {
+      return result.board;
+    }
+  }
+}
 
 export function createBoardAfterFirstClick(
   r: number,
@@ -23,10 +45,17 @@ export function createBoardAfterFirstClick(
   mines: number,
   excludeCells: number
 ): revealResult {
-  const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
-  const initialBoard = initializeBoard(rows, cols, mines, safeArea);
-  initialBoard[r][c].isRevealed = true;
-  const flooded = floodFill(initialBoard, r, c);
+  const isValidSettings = checkGameSettings({
+    rows,
+    cols,
+    mines,
+    excludeCells,
+  });
+  if (!isValidSettings.valid) {
+    alert(isValidSettings.message);
+    return { status: GameStatus.Error, board: [] };
+  }
+  const flooded = generateGoodBoard(r, c, rows, cols, mines, excludeCells);
   if (flooded[r][c].value === -1) {
     flooded[r][c].isExploded = true;
     return { status: GameStatus.Lost, board: revealAllCells(flooded) };
@@ -53,7 +82,8 @@ export function revealCellAndUpdateBoard(
   ) {
     return { status: GameStatus.Won, board: revealAllCells(nextBoard) };
   }
-  return { status: GameStatus.Playing, board: floodFill(nextBoard, r, c) };
+  const result = floodFill(nextBoard, r, c);
+  return { status: GameStatus.Playing, board: result.board };
 }
 
 export function revealAdjacentCells(
@@ -93,7 +123,8 @@ export function revealAdjacentCells(
       nextBoard[nr][nc].isExploded = true;
       return { status: GameStatus.Lost, board: revealAllCells(nextBoard) };
     } else {
-      nextBoard = floodFill(nextBoard, nr, nc);
+      const result = floodFill(nextBoard, nr, nc);
+      nextBoard = result.board;
     }
   }
   if (checkWin(nextBoard, mineCount)) {

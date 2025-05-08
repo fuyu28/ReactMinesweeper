@@ -64,15 +64,21 @@ export function initializeBoard(
   return board;
 }
 
-export function floodFill(board: Board, x: number, y: number): Board {
+type floodFillResult = {
+  board: Board;
+  openCells: [number, number][];
+};
+
+export function floodFill(board: Board, x: number, y: number): floodFillResult {
   const rows = board.length;
   const cols = board[0].length;
-
-  if (board[x][y].value === -1) return board;
 
   const newBoard = copyBoard(board);
   const visited = new Set<string>();
   const queue: [number, number][] = [[x, y]];
+  const openCells: [number, number][] = [];
+  if (board[x][y].value === -1)
+    return { board: newBoard, openCells: openCells };
 
   while (queue.length > 0) {
     const [r, c] = queue.shift()!;
@@ -80,6 +86,7 @@ export function floodFill(board: Board, x: number, y: number): Board {
     if (visited.has(key)) continue;
     visited.add(key);
     newBoard[r][c].isRevealed = true;
+    openCells.push([r, c]);
     if (newBoard[r][c].value === 0) {
       for (const [dr, dc] of directions) {
         const nr = r + dr;
@@ -92,7 +99,7 @@ export function floodFill(board: Board, x: number, y: number): Board {
       }
     }
   }
-  return newBoard;
+  return { board: newBoard, openCells: openCells };
 }
 
 export function getSafeArea(
@@ -145,6 +152,23 @@ export function revealAllCells(board: Board): Board {
       };
     })
   );
+}
+
+export function checkBadBoard(openCells: [number, number][]): boolean {
+  const minRow = Math.min(...openCells.map(([r]) => r));
+  const maxRow = Math.max(...openCells.map(([r]) => r));
+  const minCol = Math.min(...openCells.map(([, c]) => c));
+  const maxCol = Math.max(...openCells.map(([, c]) => c));
+  const openCellsSet = new Set(openCells.map(([r, c]) => `${r},${c}`));
+
+  for (let r = minRow; r <= maxRow; r++) {
+    for (let c = minCol; c <= maxCol; c++) {
+      if (!openCellsSet.has(`${r},${c}`)) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 export function copyBoard(board: Board): Board {

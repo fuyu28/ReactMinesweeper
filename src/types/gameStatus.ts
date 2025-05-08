@@ -3,4 +3,5 @@ export enum GameStatus {
   Playing = "playing",
   Lost = "lost",
   Won = "won",
+  Error = "error",
 }

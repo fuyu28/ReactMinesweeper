@@ -45,6 +45,9 @@ function App() {
       mines,
       excludeCells
     );
+    if (result.status === GameStatus.Error) {
+      return;
+    }
     setBoard(result.board);
     setStartTime(Date.now());
     setMines(mines);
