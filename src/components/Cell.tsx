@@ -1,4 +1,5 @@
 import type { Cell } from "../types/cell.ts";
+import { isTouchDevice } from "../utils/device.ts";
 
 type Props = {
   cell: Cell;
@@ -30,13 +31,23 @@ const Cell = ({ cell, onClick, onRightClick, onDoubleClick, onTap }: Props) => {
       className={`w-8 h-8 text-sm border border-gray-300 font-bold ${getCellStyle(
         cell
       )}`}
-      onClick={onClick}
-      onDoubleClick={onDoubleClick}
+      onClick={() => {
+        if (isTouchDevice()) return;
+        onClick();
+      }}
+      onDoubleClick={() => {
+        if (isTouchDevice()) return;
+        onDoubleClick();
+      }}
       onContextMenu={(e) => {
+        if (isTouchDevice()) return;
         e.preventDefault();
         onRightClick();
       }}
-      onTouchEnd={onTap}
+      onTouchEnd={() => {
+        if (!isTouchDevice()) return;
+        onTap();
+      }}
     >
       {getCellDisplay(cell)}
     </button>
