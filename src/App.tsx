@@ -10,17 +10,14 @@ import GameInfo from "./components/GameInfo";
 
 import { useGameTimer } from "./hooks/useGameTimer.ts";
 
+import { createEmptyBoard, revealAllCells, copyBoard } from "./logic/board.ts";
 import {
-  initializeBoard,
-  floodFill,
-  getSafeArea,
-  revealAllCells,
-  copyBoard,
-} from "./logic/board.ts";
-import { revealAdjacentCells } from "./logic/boardActions.ts";
+  createBoardAfterFirstClick,
+  revealCellAndUpdateBoard,
+  revealAdjacentCells,
+} from "./logic/boardActions.ts";
 import { getRemainingFlags } from "./logic/info.ts";
 import { checkGameSettings } from "./logic/checkGameSettings.ts";
-import { checkWin } from "./logic/rules.ts";
 
 const defaultSettings: GameSettingsType = {
   rows: 9,
@@ -38,17 +35,22 @@ function App() {
   const [isFirstClick, setIsFirstClick] = useState<boolean>(true);
   const [startTime, setStartTime] = useState<number | undefined>(undefined);
 
-  function handleFirstClick(r: number, c: number): Board {
+  function handleFirstClick(r: number, c: number) {
     const { rows, cols, mines, excludeCells } = gameSettings;
-    const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
-    const initialBoard = initializeBoard(rows, cols, mines, safeArea);
-    const nextBoard = initialBoard;
-
+    const result = createBoardAfterFirstClick(
+      r,
+      c,
+      rows,
+      cols,
+      mines,
+      excludeCells
+    );
+    setBoard(result.board);
     setStartTime(Date.now());
     setMines(mines);
     setGameStatus(GameStatus.Playing);
     setIsFirstClick(false);
-    return nextBoard;
+    handleGameEnd(result.status, result.board);
   }
 
   function resetGame() {
@@ -56,9 +58,8 @@ function App() {
       alert("Invalid game settings. Please check your input.");
       return;
     }
-    const { rows, cols, mines, excludeCells } = gameSettings;
-    const safeArea = getSafeArea(-1, -1, rows, cols, excludeCells);
-    const nextBoard = initializeBoard(rows, cols, mines, safeArea);
+    const { rows, cols } = gameSettings;
+    const nextBoard = createEmptyBoard(rows, cols);
     setBoard(nextBoard);
     setGameStatus(GameStatus.Ready);
     resetElapsedTime();
@@ -68,20 +69,8 @@ function App() {
   }
 
   function handleClick(r: number, c: number) {
-    let nextBoard: Board;
     if (isFirstClick) {
-      nextBoard = handleFirstClick(r, c);
-      nextBoard[r][c].isRevealed = true;
-      const flooded = floodFill(nextBoard, r, c);
-      setBoard(flooded);
-
-      if (nextBoard[r][c].value === -1) {
-        nextBoard[r][c].isExploded = true;
-        handleGameEnd(GameStatus.Lost, nextBoard);
-      }
-      if (checkWin(nextBoard, gameSettings.mines)) {
-        handleGameEnd(GameStatus.Won, nextBoard);
-      }
+      handleFirstClick(r, c);
     } else {
       if (gameStatus !== GameStatus.Playing) return;
       if (board[r][c].isFlagged) {
@@ -89,30 +78,16 @@ function App() {
         return;
       }
 
-      nextBoard = copyBoard(board);
-      nextBoard[r][c].isRevealed = true;
-      const flooded = floodFill(nextBoard, r, c);
-      setBoard(flooded);
-
-      if (board[r][c].value === -1) {
-        nextBoard[r][c].isExploded = true;
-        handleGameEnd(GameStatus.Lost, nextBoard);
-        return;
-      }
-      if (checkWin(flooded, gameSettings.mines)) {
-        handleGameEnd(GameStatus.Won, flooded);
-      }
+      const result = revealCellAndUpdateBoard(board, r, c);
+      setBoard(result.board);
+      handleGameEnd(result.status, result.board);
     }
   }
 
   function handleDoubleClick(r: number, c: number) {
     const result = revealAdjacentCells(board, r, c, mines ?? 0);
     setBoard(result.board);
-    if (result.status === GameStatus.Lost) {
-      handleGameEnd(GameStatus.Lost, result.board);
-    } else if (result.status === GameStatus.Won) {
-      handleGameEnd(GameStatus.Won, result.board);
-    }
+    handleGameEnd(result.status, result.board);
   }
 
   function handleRightClick(r: number, c: number) {

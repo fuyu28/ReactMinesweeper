@@ -1,13 +1,60 @@
 import { Board } from "../types/board";
 import { GameStatus } from "../types/gameStatus";
 import { directions } from "../constants/directions";
-import { copyBoard, floodFill, revealAllCells } from "./board";
+import {
+  getSafeArea,
+  initializeBoard,
+  copyBoard,
+  floodFill,
+  revealAllCells,
+} from "./board";
 import { checkWin } from "./rules";
 
 type revealResult =
   | { status: GameStatus.Playing; board: Board }
   | { status: GameStatus.Won; board: Board }
   | { status: GameStatus.Lost; board: Board };
+
+export function createBoardAfterFirstClick(
+  r: number,
+  c: number,
+  rows: number,
+  cols: number,
+  mines: number,
+  excludeCells: number
+): revealResult {
+  const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
+  const initialBoard = initializeBoard(rows, cols, mines, safeArea);
+  initialBoard[r][c].isRevealed = true;
+  const flooded = floodFill(initialBoard, r, c);
+  if (flooded[r][c].value === -1) {
+    flooded[r][c].isExploded = true;
+    return { status: GameStatus.Lost, board: revealAllCells(flooded) };
+  }
+  if (checkWin(flooded, mines)) {
+    return { status: GameStatus.Won, board: revealAllCells(flooded) };
+  }
+  return { status: GameStatus.Playing, board: flooded };
+}
+
+export function revealCellAndUpdateBoard(
+  board: Board,
+  r: number,
+  c: number
+): revealResult {
+  const nextBoard = copyBoard(board);
+  nextBoard[r][c].isRevealed = true;
+  if (nextBoard[r][c].value === -1) {
+    nextBoard[r][c].isExploded = true;
+    return { status: GameStatus.Lost, board: revealAllCells(nextBoard) };
+  }
+  if (
+    checkWin(nextBoard, board.flat().filter((cell) => cell.value === -1).length)
+  ) {
+    return { status: GameStatus.Won, board: revealAllCells(nextBoard) };
+  }
+  return { status: GameStatus.Playing, board: floodFill(nextBoard, r, c) };
+}
 
 export function revealAdjacentCells(
   board: Board,

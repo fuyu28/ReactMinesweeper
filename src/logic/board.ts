@@ -2,7 +2,7 @@ import type { Board } from "../types/board.ts";
 import { directions } from "../constants/directions.ts";
 import { isValidCell } from "../utils/grid.ts";
 
-function createEmptyBoard(rows: number, cols: number): Board {
+export function createEmptyBoard(rows: number, cols: number): Board {
   return Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ({
       value: 0,
