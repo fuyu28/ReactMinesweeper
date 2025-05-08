@@ -5,6 +5,7 @@ type Props = {
   onClick: () => void;
   onDoubleClick: () => void;
   onRightClick: () => void;
+  onTap: () => void;
 };
 
 function getCellDisplay(cell: Cell) {
@@ -23,7 +24,7 @@ function getCellStyle(cell: Cell) {
   return "bg-gray-400"; // 未開封のセル
 }
 
-const Cell = ({ cell, onClick, onRightClick, onDoubleClick }: Props) => {
+const Cell = ({ cell, onClick, onRightClick, onDoubleClick, onTap }: Props) => {
   return (
     <button
       className={`w-8 h-8 text-sm border border-gray-300 font-bold ${getCellStyle(
@@ -35,6 +36,7 @@ const Cell = ({ cell, onClick, onRightClick, onDoubleClick }: Props) => {
         e.preventDefault();
         onRightClick();
       }}
+      onTouchEnd={onTap}
     >
       {getCellDisplay(cell)}
     </button>

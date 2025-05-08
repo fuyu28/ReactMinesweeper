@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 
 import type { GameSettings as GameSettingsType } from "./types/gameSettings.ts";
 import type { Board } from "./types/board.ts";
+import type { ClickModeType } from "./types/clickMode.ts";
 import { GameStatus } from "./types/gameStatus.ts";
 
 import GameSettingsComponent from "./components/GameSettings";
 import GameBoard from "./components/GameBoard";
 import GameInfo from "./components/GameInfo";
+import ClickMode from "./components/ClickMode";
 
 import { useGameTimer } from "./hooks/useGameTimer.ts";
 
@@ -34,6 +36,7 @@ function App() {
   const [mines, setMines] = useState<number | undefined>(undefined);
   const [isFirstClick, setIsFirstClick] = useState<boolean>(true);
   const [startTime, setStartTime] = useState<number | undefined>(undefined);
+  const [clickMode, setClickMode] = useState<ClickModeType>("single");
 
   function handleFirstClick(r: number, c: number) {
     const { rows, cols, mines, excludeCells } = gameSettings;
@@ -113,6 +116,27 @@ function App() {
     }
   }
 
+  function handleClickModeChange(mode: ClickModeType) {
+    console.log("Click mode changed to:", mode);
+    setClickMode(mode);
+  }
+
+  function handleTap(r: number, c: number) {
+    switch (clickMode) {
+      case "single":
+        handleClick(r, c);
+        break;
+      case "double":
+        handleDoubleClick(r, c);
+        break;
+      case "right":
+        handleRightClick(r, c);
+        break;
+      default:
+        break;
+    }
+  }
+
   useEffect(() => {
     resetGame();
   }, []);
@@ -131,11 +155,15 @@ function App() {
         getRemainingFlags={getRemainingFlags(mines ?? 0, board)}
         time={elapsedTime}
       />
+      <div className="block md:hidden">
+        <ClickMode clickMode={clickMode} onClick={handleClickModeChange} />
+      </div>
       <GameBoard
         board={board}
         onClick={handleClick}
         onRightClick={handleRightClick}
         onDoubleClick={handleDoubleClick}
+        onTap={handleTap}
       />
     </div>
   );
