@@ -158,13 +158,15 @@ function App() {
       <div className="block md:hidden">
         <ClickMode clickMode={clickMode} onClick={handleClickModeChange} />
       </div>
-      <GameBoard
-        board={board}
-        onClick={handleClick}
-        onRightClick={handleRightClick}
-        onDoubleClick={handleDoubleClick}
-        onTap={handleTap}
-      />
+      <div className="overflow-auto max-h-[80vh] max-w-[90vh]">
+        <GameBoard
+          board={board}
+          onClick={handleClick}
+          onRightClick={handleRightClick}
+          onDoubleClick={handleDoubleClick}
+          onTap={handleTap}
+        />
+      </div>
     </div>
   );
 }
