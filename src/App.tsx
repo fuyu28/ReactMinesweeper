@@ -41,6 +41,15 @@ function App() {
 
   function handleFirstClick(r: number, c: number) {
     const { rows, cols, mines, excludeCells } = gameSettings;
+    if (
+      rows === undefined ||
+      cols === undefined ||
+      mines === undefined ||
+      excludeCells === undefined
+    ) {
+      alert("all fields must be filled in");
+      return;
+    }
     const result = createBoardAfterFirstClick(
       r,
       c,
@@ -66,6 +75,10 @@ function App() {
       return;
     }
     const { rows, cols } = gameSettings;
+    if (rows === undefined || cols === undefined) {
+      alert("all fields must be filled in");
+      return;
+    }
     const nextBoard = createEmptyBoard(rows, cols);
     setBoard(nextBoard);
     setGameStatus(GameStatus.Ready);

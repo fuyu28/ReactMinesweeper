@@ -7,8 +7,9 @@ type Props = {
 };
 
 const GameSettings = ({ settings, onChange, onReset }: Props) => {
-  const handleChange = (key: keyof GameSettingsType, value: number) => {
-    onChange({ ...settings, [key]: value });
+  const handleChange = (key: keyof GameSettingsType, value: string) => {
+    const parsedValue = value === "" ? undefined : Number(value);
+    onChange({ ...settings, [key]: parsedValue });
   };
   return (
     <>
@@ -19,7 +20,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
             type="number"
             min={1}
             value={settings.rows}
-            onChange={(e) => handleChange("rows", Number(e.target.value))}
+            onChange={(e) => handleChange("rows", e.target.value)}
             className="border w-16 ml-1 px-1"
           ></input>
         </label>
@@ -29,7 +30,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
             type="number"
             min={1}
             value={settings.cols}
-            onChange={(e) => handleChange("cols", Number(e.target.value))}
+            onChange={(e) => handleChange("cols", e.target.value)}
             className="border w-16 ml-1 px-1"
           ></input>
         </label>
@@ -39,7 +40,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
             type="number"
             min={1}
             value={settings.mines}
-            onChange={(e) => handleChange("mines", Number(e.target.value))}
+            onChange={(e) => handleChange("mines", e.target.value)}
             className="border w-16 ml-1 px-1"
           ></input>
         </label>
@@ -49,9 +50,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
             type="number"
             min={0}
             value={settings.excludeCells}
-            onChange={(e) =>
-              handleChange("excludeCells", Number(e.target.value))
-            }
+            onChange={(e) => handleChange("excludeCells", e.target.value)}
             className="border w-16 ml-1 px-1"
           ></input>
         </label>
