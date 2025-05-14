@@ -19,7 +19,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
           <input
             type="number"
             min={1}
-            value={settings.rows}
+            value={settings.rows ?? ""}
             onChange={(e) => handleChange("rows", e.target.value)}
             className="border w-16 ml-1 px-1"
           ></input>
@@ -29,7 +29,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
           <input
             type="number"
             min={1}
-            value={settings.cols}
+            value={settings.cols ?? ""}
             onChange={(e) => handleChange("cols", e.target.value)}
             className="border w-16 ml-1 px-1"
           ></input>
@@ -39,7 +39,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
           <input
             type="number"
             min={1}
-            value={settings.mines}
+            value={settings.mines ?? ""}
             onChange={(e) => handleChange("mines", e.target.value)}
             className="border w-16 ml-1 px-1"
           ></input>
@@ -49,7 +49,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
           <input
             type="number"
             min={0}
-            value={settings.excludeCells}
+            value={settings.excludeCells ?? ""}
             onChange={(e) => handleChange("excludeCells", e.target.value)}
             className="border w-16 ml-1 px-1"
           ></input>
