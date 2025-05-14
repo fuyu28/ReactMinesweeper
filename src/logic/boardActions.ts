@@ -11,6 +11,8 @@ import {
 } from "./board";
 import { checkGameSettings } from "./checkGameSettings";
 import { checkWin } from "./rules";
+import { GameSettings } from "../types/gameSettings";
+import type { Lang } from "../locales";
 
 type revealResult =
   | { status: GameStatus.Playing; board: Board }
@@ -40,17 +42,11 @@ function generateGoodBoard(
 export function createBoardAfterFirstClick(
   r: number,
   c: number,
-  rows: number,
-  cols: number,
-  mines: number,
-  excludeCells: number
+  settings: GameSettings,
+  lang: Lang
 ): revealResult {
-  const isValidSettings = checkGameSettings({
-    rows,
-    cols,
-    mines,
-    excludeCells,
-  });
+  const { rows, cols, mines, excludeCells } = settings;
+  const isValidSettings = checkGameSettings(settings, lang);
   if (!isValidSettings.valid) {
     alert(isValidSettings.message);
     return { status: GameStatus.Error, board: [] };

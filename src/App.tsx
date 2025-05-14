@@ -22,6 +22,9 @@ import {
 import { getRemainingFlags } from "./logic/info.ts";
 import { checkGameSettings } from "./logic/checkGameSettings.ts";
 
+import { useLang } from "./context/useLang.ts";
+import { t } from "./utils/t.ts";
+
 const defaultSettings: GameSettingsType = {
   rows: 9,
   cols: 9,
@@ -40,17 +43,11 @@ function App() {
   const [isFirstClick, setIsFirstClick] = useState<boolean>(true);
   const [startTime, setStartTime] = useState<number | undefined>(undefined);
   const [clickMode, setClickMode] = useState<ClickModeType>("single");
+  const { lang, setLang } = useLang();
 
   function handleFirstClick(r: number, c: number) {
-    const { rows, cols, mines, excludeCells } = activeGameSettings;
-    const result = createBoardAfterFirstClick(
-      r,
-      c,
-      rows,
-      cols,
-      mines,
-      excludeCells
-    );
+    const { mines } = activeGameSettings;
+    const result = createBoardAfterFirstClick(r, c, activeGameSettings, lang);
     if (result.status === GameStatus.Error) {
       return;
     }
@@ -63,8 +60,9 @@ function App() {
   }
 
   function resetGame() {
-    if (!checkGameSettings(editingSettings)) {
-      alert("Invalid game settings. Please check your input.");
+    const isValidGameSettings = checkGameSettings(editingSettings, lang);
+    if (!isValidGameSettings.valid) {
+      alert(isValidGameSettings.message);
       return;
     }
     const { rows, cols } = editingSettings;
@@ -149,7 +147,19 @@ function App() {
   const { elapsedTime, resetElapsedTime } = useGameTimer(gameStatus, startTime);
 
   return (
-    <div className="p-4 flex flex-col items-center">
+    <div className="p-4 flex flex-col items-center gap-4">
+      <div className="flex items-center gap-2">
+        <label htmlFor="lang">{t(lang, "ui.selectLang")}</label>
+        <select
+          id="lang"
+          value={lang}
+          onChange={(e) => setLang(e.target.value as typeof lang)}
+          className="border rounded px-2 py-1"
+        >
+          <option value="ja">日本語</option>
+          <option value="en">English</option>
+        </select>
+      </div>
       <GameSettingsComponent
         settings={editingSettings}
         onChange={setEditingSettings}
@@ -163,7 +173,7 @@ function App() {
       <div className="block md:hidden">
         <ClickMode clickMode={clickMode} onClick={handleClickModeChange} />
       </div>
-      <Help />
+      <Help lang={lang} />
       <div className="overflow-auto max-h-[80vh] max-w-[90vh]">
         <GameBoard
           board={board}

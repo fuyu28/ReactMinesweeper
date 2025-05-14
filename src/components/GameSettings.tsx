@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import type { GameSettings as GameSettingsType } from "../types/gameSettings.ts";
+import { useLang } from "../context/useLang.ts";
+import { t } from "../utils/t.ts";
 
 type Props = {
   settings: GameSettingsType;
@@ -9,6 +11,7 @@ type Props = {
 
 const GameSettings = ({ settings, onChange, onReset }: Props) => {
   const [disable, setDisable] = useState<boolean>(false);
+  const { lang } = useLang();
 
   useEffect(() => {
     const hasUndefined = Object.values(settings).some((v) => v === undefined);
@@ -24,7 +27,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
     <>
       <div className="flex gap-2 items-center mb-4">
         <label>
-          Rows:
+          {t(lang, "ui.rows")}
           <input
             type="number"
             min={1}
@@ -34,7 +37,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
           ></input>
         </label>
         <label>
-          Columns:
+          {t(lang, "ui.cols")}
           <input
             type="number"
             min={1}
@@ -44,7 +47,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
           ></input>
         </label>
         <label>
-          Mines:
+          {t(lang, "ui.mines")}
           <input
             type="number"
             min={1}
@@ -54,7 +57,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
           ></input>
         </label>
         <label>
-          Exclude Cells:
+          {t(lang, "ui.excludeCells")}
           <input
             type="number"
             min={0}
@@ -70,7 +73,7 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
           disabled={disable}
           className="bg-blue-500 disabled:bg-gray-400 text-white px-2 py-1 rounded"
         >
-          Reset Game
+          {t(lang, "ui.reset")}
         </button>
       </div>
     </>

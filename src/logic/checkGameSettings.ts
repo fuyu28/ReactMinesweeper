@@ -1,32 +1,32 @@
 import type { GameSettings } from "../types/gameSettings.ts";
+import type { Lang } from "../locales/index.ts";
+import { t } from "../utils/t.ts";
 
 export const checkGameSettings = (
-  settings: GameSettings
+  settings: GameSettings,
+  lang: Lang
 ): { valid: boolean; message?: string } => {
   const { rows, cols, mines, excludeCells } = settings;
   const totalCells = rows * cols;
   if (rows <= 0 || cols <= 0)
     return {
       valid: false,
-      message: "Rows and columns must be greater than 0.",
+      message: t(lang, "errors.invalidRowsCols"),
     };
   if (mines <= 0 || mines > totalCells)
     return {
       valid: false,
-      message:
-        "Mines must be greater than 0 and less than or equal to the total number of cells.",
+      message: t(lang, "errors.invalidMines"),
     };
   if (excludeCells < 0 || excludeCells >= totalCells)
     return {
       valid: false,
-      message:
-        "Exclude cells must be greater than or equal to 0 and less than the total number of cells.",
+      message: t(lang, "invalidExclude"),
     };
   if (excludeCells + mines > totalCells) {
     return {
       valid: false,
-      message:
-        "The number of excluded cells and mines must not exceed the total number of cells.",
+      message: t(lang, "exceedTotal"),
     };
   }
   return { valid: true };
