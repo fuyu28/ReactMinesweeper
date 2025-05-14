@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { GameSettings as GameSettingsType } from "../types/gameSettings.ts";
 
 type Props = {
@@ -7,10 +8,18 @@ type Props = {
 };
 
 const GameSettings = ({ settings, onChange, onReset }: Props) => {
+  const [disable, setDisable] = useState<boolean>(false);
+
+  useEffect(() => {
+    const hasUndefined = Object.values(settings).some((v) => v === undefined);
+    setDisable(hasUndefined);
+  }, [settings]);
+
   const handleChange = (key: keyof GameSettingsType, value: string) => {
     const parsedValue = value === "" ? undefined : Number(value);
     onChange({ ...settings, [key]: parsedValue });
   };
+
   return (
     <>
       <div className="flex gap-2 items-center mb-4">
@@ -58,7 +67,8 @@ const GameSettings = ({ settings, onChange, onReset }: Props) => {
       <div className="flex gap-2 items-center mb-4">
         <button
           onClick={onReset}
-          className="bg-blue-500 text-white px-2 py-1 rounded"
+          disabled={disable}
+          className="bg-blue-500 disabled:bg-gray-400 text-white px-2 py-1 rounded"
         >
           Reset Game
         </button>

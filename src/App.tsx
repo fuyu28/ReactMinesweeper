@@ -30,7 +30,9 @@ const defaultSettings: GameSettingsType = {
 };
 
 function App() {
-  const [gameSettings, setGameSettings] =
+  const [editingSettings, setEditingSettings] =
+    useState<GameSettingsType>(defaultSettings);
+  const [activeGameSettings, setActiveGameSettings] =
     useState<GameSettingsType>(defaultSettings);
   const [board, setBoard] = useState<Board>([]);
   const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Ready);
@@ -40,16 +42,7 @@ function App() {
   const [clickMode, setClickMode] = useState<ClickModeType>("single");
 
   function handleFirstClick(r: number, c: number) {
-    const { rows, cols, mines, excludeCells } = gameSettings;
-    if (
-      rows === undefined ||
-      cols === undefined ||
-      mines === undefined ||
-      excludeCells === undefined
-    ) {
-      alert("all fields must be filled in");
-      return;
-    }
+    const { rows, cols, mines, excludeCells } = activeGameSettings;
     const result = createBoardAfterFirstClick(
       r,
       c,
@@ -70,18 +63,15 @@ function App() {
   }
 
   function resetGame() {
-    if (!checkGameSettings(gameSettings)) {
+    if (!checkGameSettings(editingSettings)) {
       alert("Invalid game settings. Please check your input.");
       return;
     }
-    const { rows, cols } = gameSettings;
-    if (rows === undefined || cols === undefined) {
-      alert("all fields must be filled in");
-      return;
-    }
+    const { rows, cols } = editingSettings;
     const nextBoard = createEmptyBoard(rows, cols);
     setBoard(nextBoard);
     setGameStatus(GameStatus.Ready);
+    setActiveGameSettings(editingSettings);
     resetElapsedTime();
     setIsFirstClick(true);
     setStartTime(undefined);
@@ -160,8 +150,8 @@ function App() {
   return (
     <div className="p-4 flex flex-col items-center">
       <GameSettingsComponent
-        settings={gameSettings}
-        onChange={setGameSettings}
+        settings={editingSettings}
+        onChange={setEditingSettings}
         onReset={resetGame}
       />
       <GameInfo
