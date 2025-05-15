@@ -27,4 +27,8 @@ export default {
     doubleClickMode: "Left click on an opened cell (🔄 mode)",
     rightClickMode: "Right click (🚩 mode)",
   },
+  result: {
+    win: "Congratulations! You've won the game.",
+    lose: "Game Over! You hit a mine.",
+  },
 };

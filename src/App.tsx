@@ -110,16 +110,15 @@ function App() {
     if (status === GameStatus.Lost) {
       setGameStatus(GameStatus.Lost);
       setBoard(revealAllCells(board));
-      alert("Game Over! You hit a mine.");
+      alert(t(lang, "result.lose"));
     } else if (status === GameStatus.Won) {
       setGameStatus(GameStatus.Won);
       setBoard(revealAllCells(board));
-      alert("Congratulations! You've won the game.");
+      alert(t(lang, "result.win"));
     }
   }
 
   function handleClickModeChange(mode: ClickModeType) {
-    console.log("Click mode changed to:", mode);
     setClickMode(mode);
   }
 
