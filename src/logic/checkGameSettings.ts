@@ -21,12 +21,12 @@ export const checkGameSettings = (
   if (excludeCells < 0 || excludeCells >= totalCells)
     return {
       valid: false,
-      message: t(lang, "invalidExclude"),
+      message: t(lang, "errors.invalidExclude"),
     };
   if (excludeCells + mines > totalCells) {
     return {
       valid: false,
-      message: t(lang, "exceedTotal"),
+      message: t(lang, "errors.exceedTotal"),
     };
   }
   return { valid: true };
