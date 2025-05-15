@@ -14,12 +14,12 @@ type AllKeys = NestedPaths<AllMessages>;
 
 export const t = (lang: Lang, key: AllKeys) => {
   const parts = key.split(".");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let result: any = messages[lang];
+  let result: unknown = messages[lang];
 
   for (const part of parts) {
-    result = result?.[part];
-    if (result === undefined) return key;
+    if (typeof result === "object" && result !== null && part in result) {
+      result = (result as Record<string, unknown>)[part];
+    }
   }
-  return result;
+  return typeof result === "string" ? result : key;
 };
