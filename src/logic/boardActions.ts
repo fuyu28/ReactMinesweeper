@@ -28,14 +28,16 @@ function generateGoodBoard(
   mines: number,
   excludeCells: number
 ): Board {
+  let count = 0;
   while (true) {
     const safeArea = getSafeArea(r, c, rows, cols, excludeCells);
     const initialBoard = initializeBoard(rows, cols, mines, safeArea);
     initialBoard[r][c].isRevealed = true;
     const result = floodFill(initialBoard, r, c);
-    if (!checkBadBoard(result.openCells)) {
+    if (!checkBadBoard(result.openCells) || count > 10) {
       return result.board;
     }
+    count++;
   }
 }
 
